@@ -1,110 +1,76 @@
-import { getDbConnection } from '../db.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { ObjectId } from 'mongodb';
+import { getSupabase } from '../db.js';
+
 export const createWebsite = {
     path: '/api/create-website/:id',
     method: 'put',
     handler: async (req, res) => {
-
-        //get auth header from client
-        const { authorization } = req.headers;
         const { id } = req.params;
+        const supabase = getSupabase();
 
-        const getNewWebsite = ({
-            pages,
-            websiteName
-        }) => ({
-            pages,
-            websiteName,
-            author: id,
-            prevImgUri: "",
-            published: false
-        });
-
-        //initial index page
         const indexPage = {
-            projectId: "",
-            pageUri: "/index",
-            pageName: "Home",
-            projectAuthor: id,
-            websiteSetting: {
-                siteName: "My Website",
-                favIco: "https://reactjs.org/favicon.ico",
-                socialImage: "",
-                desc: "Description for the webpage"
+            project_id: '',
+            page_uri: '/index',
+            page_name: 'Home',
+            project_author: id,
+            website_setting: {
+                siteName: 'My Website',
+                favIco: 'https://reactjs.org/favicon.ico',
+                socialImage: '',
+                desc: 'Description for the webpage',
             },
             published: false,
-            pageMode: 1,
-            settigMode: -1,
-            isDropEnabled: true,
-            analyticsID: "",
-            dropIndex: 0,
+            page_mode: 1,
+            settig_mode: -1,
+            is_drop_enabled: true,
+            analytics_id: '',
+            drop_index: 0,
             fonts: [{
-                "font": "Poppins",
-                "weights": [
-                    "300",
-                    "regular",
-                    "700"
-                ]
+                font: 'Poppins',
+                weights: ['300', 'regular', '700'],
             }],
-            elements: []
+            elements: [],
+        };
+
+        const { data: pageData, error: pageError } = await supabase
+            .from('web_pages')
+            .insert(indexPage)
+            .select('id')
+            .single();
+
+        if (pageError) {
+            return res.status(500).json({ message: 'Failed to create page', error: pageError.message });
         }
 
+        const pageId = pageData.id;
 
+        const { data: websiteData, error: websiteError } = await supabase
+            .from('websites')
+            .insert({
+                author: id,
+                website_name: req.body.websiteName,
+                prev_img_uri: '',
+                published: false,
+                pages: [{ pageName: 'Home', pageId }],
+            })
+            .select('id')
+            .single();
 
-        if (!authorization) {
-            return res.status(401).json({ message: "No Authorization header sent." })
+        if (websiteError) {
+            return res.status(500).json({ message: 'Failed to create website', error: websiteError.message });
         }
 
-        // bearer [Token] <=== need this
-        const token = authorization.split(" ")[1];
+        const webId = websiteData.id;
 
-        jwt.verify(
-            token,
-            process.env.JWT_SECRET,
-            async (err, decoded) => {
-                if (err) return res.status(401).json({ message: "Unable to verify user" });
+        const { error: updateError } = await supabase
+            .from('web_pages')
+            .update({ project_id: webId })
+            .eq('id', pageId)
+            .eq('project_author', id);
 
-                const { id: _id } = decoded;
+        if (updateError) {
+            return res.status(500).json({ message: 'Failed to link page to website', error: updateError.message });
+        }
 
-                if (id !== _id) {
-                    return res.status(403).json({ message: "Does not have privilage to create website" });
-                }
-
-                const db = getDbConnection(process.env.API_DB_NAME);
-                const result = await db.collection("web-pages").insertOne(indexPage);
-
-                //now add above page to the new website project
-                const { insertedId: pageId } = result;
-
-                let newWebsite = getNewWebsite(req.body);
-                newWebsite.pages = [{ pageName: "Home", pageId }];
-
-                const website = await db.collection("websites").insertOne(newWebsite);
-
-                const { insertedId: webId } = website;
-
-                //update back the project id to the inserted
-                let updateWebId = await db.collection("web-pages").update(
-                    {
-                        "_id": pageId,
-                        projectAuthor: id
-                    },
-                    {
-                        $set: { projectId: webId.toString() }
-                    }
-                );
-
-
-
-                // console.log(updateWebId, pageId, webId, checkdata, webId.toString())
-
-                res.status(200).json({ message: "Website created", pageId, webId })
-
-            }
-        )
-
-
-    }
-}
+        res.status(200).json({ message: 'Website created', pageId, webId });
+    },
+};

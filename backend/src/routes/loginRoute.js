@@ -1,4 +1,4 @@
-import { getDbConnection } from '../db.js';
+import { getSupabase, mapUser } from '../db.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -7,16 +7,20 @@ export const loginRoute = {
     method: 'post',
     handler: async (req, res) => {
         const { email, password } = req.body;
+        const supabase = getSupabase();
 
-        const db = getDbConnection(process.env.API_DB_NAME);
+        const { data: userRow, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .maybeSingle();
 
-        const user = await db.collection('users').findOne({ email })
-
-        if (!user) {
+        if (error || !userRow) {
             res.sendStatus(401);
             return;
         }
 
+        const user = mapUser(userRow);
         const { _id: id, isEmailVerified, passwordHash, apiVersion, username } = user;
 
         const isCorrect = await bcrypt.compare(password, passwordHash);
@@ -28,23 +32,23 @@ export const loginRoute = {
                     isEmailVerified,
                     email,
                     username,
-                    apiVersion
+                    apiVersion,
                 },
                 process.env.JWT_SECRET,
                 {
-                    expiresIn: process.env.API_LOGIN_PERIOD
-                }, (err, token) => {
+                    expiresIn: process.env.API_LOGIN_PERIOD,
+                },
+                (err, token) => {
                     if (err) {
                         res.status(500).json(err);
                         return;
                     }
 
                     res.status(200).json({ token });
-                }
-            )
+                },
+            );
         } else {
             res.sendStatus(401);
         }
-
-    }
-}
+    },
+};

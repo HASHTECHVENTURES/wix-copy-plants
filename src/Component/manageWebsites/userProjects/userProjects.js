@@ -1,19 +1,15 @@
-import React, { useState } from 'react'
-import { useUser } from '../../auth/useUser';
-import { useToken } from '../../auth/useToken';
-// import { useNavigate } from 'react-router-dom';
+import React, { useState, useContext } from 'react'
 import axios from 'axios'
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './userProjects.css';
+import { userDetailsContext } from '../../../Context/contexts';
 
 export default function UserProjects(props) {
 
-    // let navigate = useNavigate();
-    const user = useUser();
-    const [token,] = useToken();
+    let UserDetailsState = useContext(userDetailsContext);
 
-    const { id } = user;
+    const { id } = UserDetailsState.user;
 
     let [userProj, setUserProj] = useState({
         loadingProj: false,
@@ -38,8 +34,6 @@ export default function UserProjects(props) {
                 id,
                 pageNum: userProj.currentPage,
                 perPage: userProj.perPage
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             }).then(response => {
 
                 setUserProj({ ...userProj, loadingProj: false, loadFailed: false, userProject: response.data.result, currentPage: userProj.currentPage + 1 })

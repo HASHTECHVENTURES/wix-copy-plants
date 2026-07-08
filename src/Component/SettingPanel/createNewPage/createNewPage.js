@@ -4,7 +4,6 @@ import './createNewPage.css'
 import axios from 'axios';
 import { userDetailsContext } from '../../../Context/contexts';
 import { useNavigate } from 'react-router-dom';
-import { useToken } from '../../auth/useToken';
 import { useEffect } from 'react';
 import { pageDesignContext } from '../../../Context/contexts';
 
@@ -17,8 +16,6 @@ export default function CreateNewPage(props) {
 
     let [pageName, setPageName] = useState("About")
     let [pageUri, setNewPageUri] = useState("about")
-
-    const [token,] = useToken();
 
 
 
@@ -46,8 +43,6 @@ export default function CreateNewPage(props) {
                 webId: UserDetailsState.editorState.websiteId,
                 pageName,
                 pageUri: _pageUri
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             }).then(response => {
 
                 UserDetailsState.setEditorState({ ...UserDetailsState.editorState, pageId: response.data.pageId })

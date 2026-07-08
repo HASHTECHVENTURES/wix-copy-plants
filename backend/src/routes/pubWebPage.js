@@ -1,28 +1,29 @@
-//Will return the published webpage
-import { getDbConnection } from '../db.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { ObjectId } from 'bson';
+import { getSupabase, mapWebPage } from '../db.js';
+
 export const pubWebPage = {
     path: '/api/PublishPage/',
     method: 'post',
     handler: async (req, res) => {
-
-        //get auth header from client
         const { pageUri, websiteId } = req.body;
 
         try {
-            const db = getDbConnection(process.env.API_DB_NAME);
+            const supabase = getSupabase();
 
-            const result = await db.collection("web-pages").findOne({ "pageUri": '/' + pageUri, projectId: websiteId, published: true });
-            // const webResult = await db.collection("websites").findOne({ "_id": ObjectId(websiteId) });
+            const { data, error } = await supabase
+                .from('web_pages')
+                .select('*')
+                .eq('page_uri', `/${pageUri}`)
+                .eq('project_id', websiteId)
+                .eq('published', true)
+                .single();
 
-            res.status(200).json({ message: "WebPage Fetched", result })
+            if (error) {
+                return res.status(500).json({ message: 'Something went wrong' });
+            }
+
+            res.status(200).json({ message: 'WebPage Fetched', result: mapWebPage(data) });
         } catch (e) {
-            res.status(500).json({ message: "Something went wrong" })
+            res.status(500).json({ message: 'Something went wrong' });
         }
-
-
-
-    }
-}
+    },
+};

@@ -1,7 +1,5 @@
 import { useState, useRef, useContext } from "react";
 import { pageDesignContext } from "../contexts"
-import { useUser } from "../../Component/auth/useUser";
-import { useToken } from "../../Component/auth/useToken";
 import axios from 'axios'
 import { userDetailsContext } from "../contexts";
 import * as htmlToImage from 'html-to-image';
@@ -53,24 +51,11 @@ const PageDesignState = (props) => {
     const [actElLayer, setELLayer] = useState("0,");
     const [webDesignState, setWebDesignState] = useState({});
 
-    const user = useUser();
-    const [token,] = useToken();
-
-
-    const [tokenTracker, setTokenTracker] = useState(token);
+    const [tokenTracker, setTokenTracker] = useState("");
 
     useEffect(() => {
-        if (user) {
-            let { id } = user;
-            if (id) UserDetailsState.setUserDeatils({ ...UserDetailsState.user, _id: id, id: id })
-        }
-
-    }, [user])
-
-    useEffect(() => {
-
-        setTokenTracker(token);
-    }, [token])
+        setTokenTracker("");
+    }, [])
 
 
     const saveWebPage = async (status, ImgUri, type) => {
@@ -84,8 +69,6 @@ const PageDesignState = (props) => {
                 id: UserDetailsState.user.id,
                 websiteId: UserDetailsState.editorState.websiteId,
                 imageUri: "" + ImgUri
-            }, {
-                headers: { Authorization: `Bearer ${tokenTracker}` }
             })
         }
 
@@ -105,8 +88,6 @@ const PageDesignState = (props) => {
                 id: UserDetailsState.user.id,
                 pageId: UserDetailsState.editorState.pageId,
                 pageJso: __design_data
-            }, {
-                headers: { Authorization: `Bearer ${tokenTracker}` }
             }).then(response => {
                 // 
                 alert("Saved.")
@@ -128,8 +109,6 @@ const PageDesignState = (props) => {
                 id: UserDetailsState.user.id,
                 pageId: UserDetailsState.editorState.pageId,
                 webId: UserDetailsState.editorState.websiteId
-            }, {
-                headers: { Authorization: `Bearer ${tokenTracker}` }
             }).then(response => {
                 // 
                 alert("Deleted.")

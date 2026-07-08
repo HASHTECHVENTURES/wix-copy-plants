@@ -106,8 +106,7 @@ export default function Homepage() {
                             <div className="wd wd-3 bld_0_0_0_2_">
                                 <nav data-navigation-menu="true" className=" bld_0_0_0_2_0_">
                                     <ul className=" bld_0_0_0_2_0_0_">
-                                        <li className=" bld_0_0_0_2_0_0_0_"><Link to="/login" target="_self" className=" bld_0_0_0_2_0_0_0_0_">Login</Link></li>
-                                        <li className=" bld_0_0_0_2_0_0_1_"><Link to="/signup" target="_self" className=" bld_0_0_0_2_0_0_1_0_">Get Started</Link></li>
+                                        <li className=" bld_0_0_0_2_0_0_1_"><Link to="/my-websites" target="_self" className=" bld_0_0_0_2_0_0_1_0_">Get Started</Link></li>
                                     </ul>
                                 </nav>
                             </div>
@@ -137,7 +136,7 @@ export default function Homepage() {
                                         <div>and within blink you will have the&nbsp;</div>
                                         <div>website as you imagined!</div>
                                     </div>
-                                </p><Link className=" bld_2_0_0_0_2_" to="/signup">Get started</Link>
+                                </p><Link className=" bld_2_0_0_0_2_" to="/my-websites">Get started</Link>
                             </div>
                         </div>
                     </div>

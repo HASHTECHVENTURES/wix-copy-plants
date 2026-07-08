@@ -1,4 +1,4 @@
-import { getDbConnection } from '../db.js';
+import { getSupabase } from '../db.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -66,10 +66,28 @@ export const createNewWebsite = {
                     return res.status(403).json({ message: "Does not have privilage to create website" });
                 }
 
-                const db = getDbConnection(process.env.API_DB_NAME);
-                const result = await db.collection("webPages").insertOne(newWebsiteDom);
+                const supabase = getSupabase();
+                const { error } = await supabase.from('web_pages').insert({
+                    project_id: '',
+                    project_author: id,
+                    page_uri: '/index',
+                    page_name: 'Home',
+                    website_setting: newWebsiteDom.websiteSetting,
+                    published: newWebsiteDom.published,
+                    page_mode: newWebsiteDom.pageMode,
+                    settig_mode: newWebsiteDom.settigMode,
+                    is_drop_enabled: newWebsiteDom.isDropEnabled,
+                    analytics_id: newWebsiteDom.analyticsID,
+                    drop_index: newWebsiteDom.dropIndex,
+                    fonts: newWebsiteDom.fonts,
+                    elements: newWebsiteDom.elements,
+                });
 
-                res.status(200).json({ message: "Website created" })
+                if (error) {
+                    return res.status(500).json({ message: 'Failed to create website page', error: error.message });
+                }
+
+                res.status(200).json({ message: 'Website created' });
 
             }
         )

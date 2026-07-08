@@ -1,77 +1,55 @@
-import { getDbConnection } from '../db.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { ObjectId } from 'mongodb';
+import { getSupabase } from '../db.js';
 
 export const removeWebPage = {
     path: '/api/remove-webpage/',
     method: 'post',
     handler: async (req, res) => {
+        const { pageId, webId } = req.body;
+        const supabase = getSupabase();
 
-        //get auth header from client
-        const { authorization } = req.headers;
-        const { id, pageId, webId } = req.body;
+        const { data: delpage, error: findError } = await supabase
+            .from('web_pages')
+            .select('page_name')
+            .eq('id', pageId)
+            .single();
 
-        if (!authorization) {
-            return res.status(401).json({ message: "No Authorization header sent." })
+        if (findError) {
+            return res.status(500).json({ message: 'Page not found', error: findError.message });
         }
 
-        // bearer [Token] <=== need this
-        const token = authorization.split(" ")[1];
+        const { error: deleteError } = await supabase
+            .from('web_pages')
+            .delete()
+            .eq('id', pageId);
 
-        jwt.verify(
-            token,
-            process.env.JWT_SECRET,
-            async (err, decoded) => {
-                if (err) return res.status(401).json({ message: "Unable to verify user" });
+        if (deleteError) {
+            return res.status(500).json({ message: 'Failed to delete page', error: deleteError.message });
+        }
 
-                const { id: _id } = decoded;
+        const { data: websiteData, error: websiteError } = await supabase
+            .from('websites')
+            .select('pages')
+            .eq('id', webId)
+            .single();
 
+        if (websiteError) {
+            return res.status(500).json({ message: 'Failed to update website', error: websiteError.message });
+        }
 
-                if (id !== _id) {
-                    return res.status(403).json({ message: "Does not have privilage to modify website" });
-                }
+        const updatedPages = (websiteData.pages ?? []).filter(
+            (page) => page.pageId !== pageId,
+        );
 
-                const db = getDbConnection(process.env.API_DB_NAME);
-                const delpage = await db.collection("web-pages").findOne({
+        const { error: updateError } = await supabase
+            .from('websites')
+            .update({ pages: updatedPages })
+            .eq('id', webId);
 
-                    "_id": ObjectId(pageId)
+        if (updateError) {
+            return res.status(500).json({ message: 'Failed to update website pages', error: updateError.message });
+        }
 
-                })
-
-                // console.log(delpage);
-
-                const result = await db.collection("web-pages").deleteOne(
-                    {
-                        "_id": ObjectId(pageId)
-                    },
-                    { returnOriginal: true }
-                );
-
-                // console.log(result);
-
-                // console.log({ pages: { pageId: ObjectId(pageId), pageName: delpage.pageName } })
-                //update the website json
-
-                const webResult = await db.collection("websites").findOneAndUpdate(
-                    {
-                        "_id": ObjectId(webId)
-                    },
-                    { $pull: { pages: { pageId: ObjectId(pageId), pageName: delpage.pageName } } },
-                    { returnOriginal: false }
-                );
-
-                const firstProjectPage = await db.collection("websites").findOne({ "_id": ObjectId(webId) });
-
-                let { pages } = firstProjectPage;
-
-                // console.log(webResult);
-
-                res.status(200).json({ message: "Website deleted", pageId: pages[0].pageId })
-
-            }
-        )
-
-
-    }
-}
+        const firstPageId = updatedPages[0]?.pageId ?? null;
+        res.status(200).json({ message: 'Website deleted', pageId: firstPageId });
+    },
+};

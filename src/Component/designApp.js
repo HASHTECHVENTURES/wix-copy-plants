@@ -1,5 +1,4 @@
 import { useEffect, useContext, useRef, useState } from 'react';
-// import { pageDesignContext, userDetailsContext } from '../Context/contexts';
 import AppStyles from './designApp.module.css';
 import Navbar from './Navbar/navbar';
 import Sidecolumn from './Sidecolumn/sidecolumn';
@@ -9,8 +8,6 @@ import SettingPanel from './SettingPanel/settingPanel';
 import { userDetailsContext } from '../Context/contexts';
 import { pageDesignContext } from '../Context/contexts';
 
-import { useUser } from './auth/useUser';
-import { useToken } from './auth/useToken'
 import axios from 'axios'
 
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -56,10 +53,7 @@ function DesignApp() {
 
 
 
-    const user = useUser();
-    const [token,] = useToken();
-
-    const { id } = user;
+    const { id } = UserDetailsState.user;
 
     useEffect(() => {
         UserDetailsState.setEditorState({ ...UserDetailsState.editorState, ...__webpageParams });
@@ -84,8 +78,6 @@ function DesignApp() {
                 id,
                 pageId: _pid,
                 websiteId: _wid
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             }).then(response => {
                 // 
                 if (response.data.result) {

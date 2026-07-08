@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useRef, useContext } from 'react'
-import { useUser } from '../auth/useUser';
-import { useToken } from '../auth/useToken';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import parse from 'html-react-parser';
 import FontLoader from '../PreviewPanel/fontLoader/fontLoader';
 import SetStyle from './setStyle';
 import { cssSheetPreview } from '../../Context/contexts';
+import { userDetailsContext } from '../../Context/contexts';
 
 import './previewPage.css'
 export default function PreviewPage() {
 
-    const user = useUser();
-    const [token,] = useToken();
+    let UserDetailsState = useContext(userDetailsContext);
     const __webpageParams = useParams();
     let cssSheetPreviewState = useContext(cssSheetPreview)
 
@@ -59,11 +57,9 @@ export default function PreviewPage() {
         try {
 
             await axios.post('/api/getWebPage/', {
-                id: user.id,
+                id: UserDetailsState.user.id,
                 pageId: __webpageParams.pageId,
                 websiteId: __webpageParams.websiteId
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             }).then(response => {
                 if (response.data.result) {
 

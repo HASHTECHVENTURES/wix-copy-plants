@@ -1,35 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { userDetailsContext } from "../contexts";
-import { useUser } from "../../Component/auth/useUser";
 
 const UserDetailsState = (props) => {
 
     const initialUserDetails = {
-        user: "",
-        email: "",
-        _id: "",
+        user: "guest",
+        email: "guest@example.com",
+        _id: "guest_id",
         pageId: "",
         websiteId: "",
-        id: ""
+        id: "guest_id"
     }
 
 
     const [user, setUserDeatils] = useState(initialUserDetails)
     const [editorState, setEditorState] = useState({})
-
-    const userId = useUser();
-
-    useEffect(() => {
-
-        if (userId) {
-            setUserDeatils({ ...userId, user: userId.username })
-
-        }
-    }, [userId])
-
-    // useEffect(() => {
-    //     
-    // }, [editorState])
 
     return (
         <userDetailsContext.Provider value={{ user, setUserDeatils, editorState, setEditorState }}>

@@ -3,7 +3,6 @@ import nvstyle from './navbar.module.css';
 import './navbar.css'
 import { pageDesignContext, userDetailsContext } from '../../Context/contexts';
 import { useNavigate, useMatch, Link } from 'react-router-dom';
-import { useUser } from '../auth/useUser';
 export default function Navbar() {
 
     const navigate = useNavigate();
@@ -17,8 +16,6 @@ export default function Navbar() {
 
     const isPageDesign = useMatch("/designer/:projectId/:pageId")
     const isPageDesignEmpty = useMatch("/designer/:projectId/:pageId")
-
-    const isUser = useUser();
 
     useEffect(() => {
 
@@ -205,7 +202,6 @@ export default function Navbar() {
                             /* Will do that sometime else
                             <li><a href='/'>My Profile</a></li> */}
                             <li><Link to='/my-websites'>My Websites</Link></li>
-                            <li><a onClick={() => { localStorage.removeItem('token'); navigate("/") }}>Logout</a></li>
                         </ul>
                     </li>
                 </ul>
