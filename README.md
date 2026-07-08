@@ -69,11 +69,12 @@ Full functional Wix clone created in React, Express and Supabase (Postgres). Has
 ### Deploy on Vercel
 
 1. Import the repo at [vercel.com/new](https://vercel.com/new).
-2. Add these **Environment Variables** (required for API to work):
+2. Add these **Environment Variables** (required — without them the API hangs or returns errors):
    - `JWT_SECRET`
    - `API_LOGIN_PERIOD` (e.g. `2d`)
-   - `SUPABASE_URL`
+   - `SUPABASE_URL` (`https://spsmjkzxwbfeumzrcdaq.supabase.co`)
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `REACT_APP_GOOGLE_API_KEY` (optional)
    - `REACT_APP_PEXELS_API_KEY` (optional)
-3. Deploy — `vercel.json` builds the React app and serves it with the Express API on one domain.
+3. Redeploy after adding env vars.
+4. Verify: open `/api/health` — you should see `{"status":"ok",...}`.
