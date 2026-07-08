@@ -20,32 +20,35 @@ export default function UserProjects(props) {
     })
 
     useEffect(() => {
-        loadUserProject();
-    }, []);
+        if (id && id !== 'guest_id') {
+            loadUserProject();
+        } else {
+            setUserProj((prev) => ({ ...prev, loadingProj: false }));
+        }
+    }, [id]);
 
 
 
     const loadUserProject = async () => {
-        setUserProj({ ...userProj, loadingProj: true })
+        setUserProj((prev) => ({ ...prev, loadingProj: true, loadFailed: false }))
 
         try {
-
-            await axios.post('/api/my-projects/', {
+            const response = await axios.post('/api/my-projects/', {
                 id,
                 pageNum: userProj.currentPage,
                 perPage: userProj.perPage
-            }).then(response => {
+            });
 
-                setUserProj({ ...userProj, loadingProj: false, loadFailed: false, userProject: response.data.result, currentPage: userProj.currentPage + 1 })
-            }).catch(err => {
-
-                setUserProj({ ...userProj, loadingProj: false, loadFailed: true })
-            })
-
-
+            setUserProj((prev) => ({
+                ...prev,
+                loadingProj: false,
+                loadFailed: false,
+                userProject: response.data.result,
+                currentPage: prev.currentPage + 1
+            }));
         } catch (err) {
             console.error(err);
-            setUserProj({ ...userProj, loadingProj: false, loadFailed: true })
+            setUserProj((prev) => ({ ...prev, loadingProj: false, loadFailed: true }));
         }
     }
 
@@ -59,7 +62,7 @@ export default function UserProjects(props) {
                 </div>}
                 {
                     (userProj.loadFailed) && <div className="loading-failed">
-                        Loading failed try again
+                        Loading failed — check that the API is running and try again.
                     </div>
                 }
                 {(userProj.userProject.length > 0) ?
@@ -71,7 +74,7 @@ export default function UserProjects(props) {
                                     <div key={i} className="projectoption">
                                         <Link to={`/designer/${e._id}/${e.pages[0].pageId}/`}>
                                             <div className='projimgshowcase'>
-                                                <img src={(e.prevImgUri) ? e.prevImgUri : "/assets/images/elements/html/dummyImage.jpg"} />
+                                                <img alt="" src={(e.prevImgUri) ? e.prevImgUri : "/assets/images/elements/html/dummyImage.jpg"} />
                                             </div>
                                             <div className='projectDetails'>
                                                 <div className='projTitle'>{e.websiteName}</div>
@@ -86,12 +89,12 @@ export default function UserProjects(props) {
 
                     </div>
                     :
-                    <>
+                    !userProj.loadingProj && !userProj.loadFailed && (
                         <div className='createFirstProject'>
                             <h4>Let's get started with your first website</h4>
                             <button onClick={props.createNewWeb}>Create my first website!</button>
                         </div>
-                    </>
+                    )
                 }
 
             </div>

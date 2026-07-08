@@ -4,6 +4,8 @@ import PreviewPage from './previewPage/previewPage';
 import WebPage from './web/webPage';
 import Homepage from './Homepage/homepage';
 import NotFound from './NotFound/notFound'
+import LoginPage from './auth/LoginPage/loginPage';
+import SignupPage from './auth/signupPage/signupPage';
 
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'
 
@@ -14,6 +16,8 @@ function App() {
         <Route path="/" element={<Homepage />} exact>
 
         </Route>
+        <Route path="/login" element={<LoginPage />}></Route>
+        <Route path="/signup" element={<SignupPage />}></Route>
         <Route path="/web/:websiteId/:pageUri" element={<WebPage />} exact>
 
         </Route>

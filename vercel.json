@@ -1,30 +1,21 @@
 {
-  "services": {
-    "frontend": {
-      "root": ".",
-      "framework": "create-react-app",
-      "installCommand": "npm install --legacy-peer-deps",
-      "buildCommand": "DISABLE_ESLINT_PLUGIN=true npm run build"
-    },
-    "backend": {
-      "root": "backend",
-      "entrypoint": "src/server.js"
+  "version": 2,
+  "installCommand": "npm install --legacy-peer-deps && npm install --prefix backend",
+  "buildCommand": "DISABLE_ESLINT_PLUGIN=true npm run build && rm -rf backend/build && cp -r build backend/build",
+  "builds": [
+    {
+      "src": "backend/src/server.js",
+      "use": "@vercel/node"
     }
-  },
-  "rewrites": [
+  ],
+  "routes": [
     {
-      "source": "/api(/.*)?",
-      "destination": {
-        "type": "service",
-        "service": "backend"
-      }
+      "src": "/api/(.*)",
+      "dest": "backend/src/server.js"
     },
     {
-      "source": "/(.*)",
-      "destination": {
-        "type": "service",
-        "service": "frontend"
-      }
+      "src": "/(.*)",
+      "dest": "backend/src/server.js"
     }
   ]
 }

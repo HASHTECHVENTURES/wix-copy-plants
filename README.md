@@ -66,20 +66,14 @@ Full functional Wix clone created in React, Express and Supabase (Postgres). Has
 5. `npm run dev` to run on a local machine. For deployment use `node ./src/server.js`
 6. It should be available on the port 8000.
 
-### Deploy on Vercel (Services)
+### Deploy on Vercel
 
-This project uses [Vercel Services](https://vercel.com/docs/services) with a split frontend + backend:
-
-- **Frontend** (`create-react-app`) serves the UI at `/`
-- **Backend** (Express) handles `/api/*` routes
-
-1. Push this repo to GitHub and import it in [Vercel](https://vercel.com/new).
-2. In Project Settings → Build & Deployment, set **Framework Preset** to **Services**.
-3. Add these **Environment Variables**:
+1. Import the repo at [vercel.com/new](https://vercel.com/new).
+2. Add these **Environment Variables** (required for API to work):
    - `JWT_SECRET`
    - `API_LOGIN_PERIOD` (e.g. `2d`)
    - `SUPABASE_URL`
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `REACT_APP_GOOGLE_API_KEY` (optional)
    - `REACT_APP_PEXELS_API_KEY` (optional)
-4. Deploy — routing is configured in `vercel.json`.
+3. Deploy — `vercel.json` builds the React app and serves it with the Express API on one domain.

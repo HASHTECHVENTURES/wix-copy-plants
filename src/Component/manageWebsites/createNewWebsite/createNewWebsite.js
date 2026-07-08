@@ -40,8 +40,8 @@ export default function CreateNewWebsite(props) {
                 navigate(`/designer/${response.data.webId}/${response.data.pageId}/`)
 
             }).catch(err => {
-
-                alert("Unable to create a website");
+                console.error(err);
+                alert(err.response?.data?.message || "Unable to create a website");
             })
 
 
