@@ -1,17 +1,28 @@
 {
-  "version": 2,
-  "installCommand": "npm install && npm install --prefix backend",
-  "buildCommand": "npm run build && rm -rf backend/build && cp -r build backend/build",
-  "builds": [
-    {
-      "src": "backend/src/server.js",
-      "use": "@vercel/node"
+  "services": {
+    "frontend": {
+      "root": ".",
+      "framework": "create-react-app"
+    },
+    "backend": {
+      "root": "backend",
+      "entrypoint": "src/server.js"
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "backend/src/server.js"
+      "source": "/api(/.*)?",
+      "destination": {
+        "type": "service",
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "type": "service",
+        "service": "frontend"
+      }
     }
   ]
 }

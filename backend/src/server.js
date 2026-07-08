@@ -8,6 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PORT = process.env.PORT || 8080;
+const isVercelService = Boolean(process.env.VERCEL);
 
 const app = express();
 
@@ -28,17 +29,19 @@ app.use(async (req, res, next) => {
     }
 });
 
-app.use(express.static(path.join(__dirname, '../build')));
+if (!isVercelService) {
+    app.use(express.static(path.join(__dirname, '../build')));
 
-app.get(/^(?!\/api).+/, (req, res) => {
-    res.sendFile(path.join(__dirname, '../build/index.html'));
-});
+    app.get(/^(?!\/api).+/, (req, res) => {
+        res.sendFile(path.join(__dirname, '../build/index.html'));
+    });
+}
 
 routes.forEach(route => {
     app[route.method](route.path, route.handler);
 });
 
-if (!process.env.VERCEL) {
+if (!isVercelService) {
     dbReady.then(() => {
         app.listen(PORT, () => {
             console.log(`Server is listening on port ${PORT}`);
